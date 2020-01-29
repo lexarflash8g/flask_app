@@ -1,0 +1,39 @@
+Dockerfile
+
+FROM python:2.7
+RUN pip install flask-mysqldb
+RUN pip install flask-mysql
+
+Docker-compose
+
+version: '3.1'
+services:
+    nginx:
+        image: nginx
+        container_name: nginx
+        volumes:
+        - ./nginx.conf:/etc/nginx/conf.d/default.conf
+        networks:
+            - my-network
+        ports:
+            - 80:80
+    flask:
+        build:
+            context: ./
+            dockerfile: Dockerfile
+        image: flask:0.0.1
+        container_name: flask
+        volumes:
+            - ./:/app/
+        environment:
+            - FLASK_APP=/app/app.py
+        command: export FLASK_ENV=development
+        command: flask run --host=0.0.0.0
+        networks:
+            my-network:
+                aliases:
+                    - flask-app
+        ports:
+            - 8080:5000
+networks:
+    my-network:
